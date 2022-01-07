@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  php:
+    container_name: source-analysis-laravel
+    build:
+      context: ./php
+    working_dir: /var/www
+    volumes:
+      - ./laravel-src:/var/www
+    ports:
+      - "8000:8000"
+      - "9000:9000"
+    tty: true
