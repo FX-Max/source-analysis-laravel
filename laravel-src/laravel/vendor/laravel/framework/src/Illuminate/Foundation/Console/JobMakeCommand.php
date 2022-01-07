@@ -42,7 +42,7 @@ class JobMakeCommand extends GeneratorCommand
 
     /**
      * Get the default namespace for the class.
-     *
+     * Job相关的类默认会放在 Jobs 目录下面
      * @param  string  $rootNamespace
      * @return string
      */

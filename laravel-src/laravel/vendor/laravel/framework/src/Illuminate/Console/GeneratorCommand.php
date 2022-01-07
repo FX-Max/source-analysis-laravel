@@ -50,13 +50,15 @@ abstract class GeneratorCommand extends Command
      */
     public function handle()
     {
+        // 获取类名
         $name = $this->qualifyClass($this->getNameInput());
-
+        // 获取文件路径
         $path = $this->getPath($name);
 
         // First we will check to see if the class already exists. If it does, we don't want
         // to create the class and overwrite the user's code. So, we will bail out so the
         // code is untouched. Otherwise, we will continue generating this class' files.
+        // 检查要创建的类是否存在
         if ((! $this->hasOption('force') ||
              ! $this->option('force')) &&
              $this->alreadyExists($this->getNameInput())) {
@@ -68,10 +70,11 @@ abstract class GeneratorCommand extends Command
         // Next, we will generate the path to the location where this class' file should get
         // written. Then, we will build the class and make the proper replacements on the
         // stub files so that it gets the correctly formatted namespace and class name.
+        // 创建目录和文件
         $this->makeDirectory($path);
-
+        // buildClass() 通过模板获取新类文件的内容
         $this->files->put($path, $this->buildClass($name));
-
+        // $this->type 在子类中定义好了，例如 JobMakeCommand 中 type = 'Job'
         $this->info($this->type.' created successfully.');
     }
 
@@ -157,8 +160,9 @@ abstract class GeneratorCommand extends Command
      */
     protected function buildClass($name)
     {
+        // 得到类文件模板，getStub() 在子类中有实现，如 JobMakeCommand 的为 stubs/job-queued.stub
         $stub = $this->files->get($this->getStub());
-
+        // 用实际的name来替换模板中的内容，都是关键词替换，比较简单
         return $this->replaceNamespace($stub, $name)->replaceClass($stub, $name);
     }
 

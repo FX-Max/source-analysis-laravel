@@ -1,5 +1,7 @@
 <?php
-
+/**
+* job 类的生成模板
+*/
 namespace DummyNamespace;
 
 use Illuminate\Bus\Queueable;

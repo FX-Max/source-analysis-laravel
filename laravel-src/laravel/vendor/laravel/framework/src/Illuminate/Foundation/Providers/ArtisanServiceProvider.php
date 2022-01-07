@@ -446,7 +446,7 @@ class ArtisanServiceProvider extends ServiceProvider implements DeferrableProvid
 
     /**
      * Register the command.
-     *
+     * [A] make:job 时触发的方法
      * @return void
      */
     protected function registerJobMakeCommand()
