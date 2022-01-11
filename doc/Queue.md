@@ -1,16 +1,10 @@
 > laravel 源码分析具体注释见 [https://github.com/FX-Max/source-analysis-laravel](https://github.com/FX-Max/source-analysis-laravel)
 
-
-
 # 前言
 
 队列 (Queue) 是 laravel 中比较常用的一个功能，队列的目的是将耗时的任务延时处理，比如发送邮件，从而大幅度缩短 Web 请求和响应的时间。本文我们就来分析下队列创建和执行的源码。
 
-
-
 # 队列任务的创建
-
-
 
 先通过命令创建一个 Job 类，成功之后会创建如下文件 laravel-src/laravel/app/Jobs/DemoJob.php。
 
@@ -19,8 +13,6 @@
 
 > Job created successfully.
 ```
-
-
 
 下面我们来分析一下 Job 类的具体生成过程。
 
@@ -42,15 +34,11 @@ protected function registerJobMakeCommand()
 }
 ```
 
-
-
 接着我们来看下 JobMakeCommand 这个类，这个类里面没有过多的处理逻辑，处理方法在其父类中。
 
 ```php
 class JobMakeCommand extends GeneratorCommand
 ```
-
-
 
 我们直接看父类中的处理方法，GeneratorCommand->handle()，以下是该方法中的主要方法。
 
@@ -70,8 +58,6 @@ public function handle()
 }
 ```
 
-
-
 方法就是通过目录和文件，创建对应的类文件，至于新文件的内容，都是基于已经设置好的模板来创建的，具体的内容在 buildClass($name) 方法中。
 
 ```php
@@ -84,8 +70,6 @@ protected function buildClass($name)
 }
 ```
 
-
-
 获取模板文件
 
 ```php
@@ -96,8 +80,6 @@ protected function getStub()
                     : __DIR__.'/stubs/job-queued.stub';
 }
 ```
-
-
 
 job.stub
 
@@ -136,8 +118,6 @@ class DummyClass
     }
 }
 ```
-
-
 
 job-queued.stub
 
@@ -180,8 +160,6 @@ class DummyClass implements ShouldQueue
 }
 ```
 
-
-
 下面看一下前面我们创建的一个Job类，DemoJob.php，就是来源于模板 job-queued.stub。
 
 ```php
@@ -223,6 +201,19 @@ class DemoJob implements ShouldQueue
 }
 ```
 
-
-
 至此，我们已经大致明白了队列任务类是如何创建的了。下面我们来分析下其是如何生效运行的。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

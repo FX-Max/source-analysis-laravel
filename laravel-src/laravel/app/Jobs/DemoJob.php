@@ -32,5 +32,6 @@ class DemoJob implements ShouldQueue
     public function handle()
     {
         //
+        echo 'DemoJob handle' . '->' . time() . PHP_EOL;
     }
 }
