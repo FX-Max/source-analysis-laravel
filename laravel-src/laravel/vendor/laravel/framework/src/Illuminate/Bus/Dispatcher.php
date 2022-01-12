@@ -3,6 +3,7 @@
 namespace Illuminate\Bus;
 
 use Closure;
+use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
 use RuntimeException;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Contracts\Queue\Queue;
@@ -57,6 +58,13 @@ class Dispatcher implements QueueingDispatcher
     public function __construct(Container $container, Closure $queueResolver = null)
     {
         $this->container = $container;
+        /**
+         * Illuminate/Bus/BusServiceProvider.php->register()中
+         * $queueResolver 传入的是一个闭包
+         * function ($connection = null) use ($app) {
+         *   return $app[QueueFactoryContract::class]->connection($connection);
+         * }
+         */
         $this->queueResolver = $queueResolver;
         $this->pipeline = new Pipeline($container);
     }
@@ -69,7 +77,9 @@ class Dispatcher implements QueueingDispatcher
      */
     public function dispatch($command)
     {
+        // 判断 $command 是否是 ShouldQueue 类
         if ($this->queueResolver && $this->commandShouldBeQueued($command)) {
+            // 将 $command 存入队列
             return $this->dispatchToQueue($command);
         }
 
@@ -145,18 +155,23 @@ class Dispatcher implements QueueingDispatcher
      */
     public function dispatchToQueue($command)
     {
+        // 获取任务所属的 connection
         $connection = $command->connection ?? null;
-
+        /*
+         * 获取队列实例，根据config/queue.php中的配置
+         * 此处我们配置 QUEUE_CONNECTION=redis 为例，则获取的是RedisQueue
+         * 至于如何通过 QUEUE_CONNECTION 的配置获取 queue ，此处先跳过，本文后面会具体分析。
+         */
         $queue = call_user_func($this->queueResolver, $connection);
 
         if (! $queue instanceof Queue) {
             throw new RuntimeException('Queue resolver did not return a Queue implementation.');
         }
-
+        // 我们创建的DemoJob无queue方法，则不会调用
         if (method_exists($command, 'queue')) {
             return $command->queue($queue, $command);
         }
-
+        // 将 job 放入队列
         return $this->pushCommandToQueue($queue, $command);
     }
 
@@ -169,6 +184,7 @@ class Dispatcher implements QueueingDispatcher
      */
     protected function pushCommandToQueue($queue, $command)
     {
+        // 在指定了 queue 或者 delay 时会调用不同的方法，基本大同小异
         if (isset($command->queue, $command->delay)) {
             return $queue->laterOn($command->queue, $command->delay, $command);
         }
@@ -180,7 +196,7 @@ class Dispatcher implements QueueingDispatcher
         if (isset($command->delay)) {
             return $queue->later($command->delay, $command);
         }
-
+        // 此处我们先看最简单的无参数时的情况，调用push()
         return $queue->push($command);
     }
 

@@ -20,7 +20,7 @@ class PendingDispatch
      * @return void
      */
     public function __construct($job)
-    {
+    {   echo '[Max] ' . 'PendingDispatch ' . '__construct' . PHP_EOL;
         $this->job = $job;
     }
 
@@ -108,7 +108,7 @@ class PendingDispatch
      * @return void
      */
     public function __destruct()
-    {
+    {   echo '[Max] ' . 'PendingDispatch ' . '__destruct' . PHP_EOL;
         app(Dispatcher::class)->dispatch($this->job);
     }
 }

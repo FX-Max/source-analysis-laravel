@@ -81,13 +81,20 @@ class RedisQueue extends Queue implements QueueContract
     /**
      * Push a new job onto the queue.
      *
-     * @param  object|string  $job
-     * @param  mixed   $data
-     * @param  string|null  $queue
+     * @param  object|string  $job 任务
+     * @param  mixed   $data 队列数据
+     * @param  string|null  $queue 队列名称
      * @return mixed
      */
     public function push($job, $data = '', $queue = null)
     {
+        /**
+         * 获取队列名称
+         * var_dump($this->getQueue($queue));
+         * 创建统一的 payload，转成 json
+         * var_dump($this->createPayload($job, $this->getQueue($queue), $data));
+         */
+        // 将任务和数据存入队列
         return $this->pushRaw($this->createPayload($job, $this->getQueue($queue), $data), $queue);
     }
 
@@ -101,11 +108,12 @@ class RedisQueue extends Queue implements QueueContract
      */
     public function pushRaw($payload, $queue = null, array $options = [])
     {
+        // 写入redis中
         $this->getConnection()->eval(
             LuaScripts::push(), 2, $this->getQueue($queue),
             $this->getQueue($queue).':notify', $payload
         );
-
+        // 返回id
         return json_decode($payload, true)['id'] ?? null;
     }
 
