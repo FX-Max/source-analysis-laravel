@@ -38,7 +38,7 @@ class Order extends Command
      */
     public function handle()
     {
-        //
+        // 分发任务
         DemoJob::dispatch();
     }
 }

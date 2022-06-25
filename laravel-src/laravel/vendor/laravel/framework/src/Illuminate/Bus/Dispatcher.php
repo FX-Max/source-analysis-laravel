@@ -77,12 +77,12 @@ class Dispatcher implements QueueingDispatcher
      */
     public function dispatch($command)
     {
-        // 判断 $command 是否是 ShouldQueue 类
+        // 判断 $command 是否是 ShouldQueue 类，表示是异步队列而非同步，将其加入队列中
         if ($this->queueResolver && $this->commandShouldBeQueued($command)) {
             // 将 $command 存入队列
             return $this->dispatchToQueue($command);
         }
-
+        // 如果是同步队列，则直接调用 dispatchNow，和我们使用 dispatchNow 手动分发是一样的
         return $this->dispatchNow($command);
     }
 
@@ -167,7 +167,10 @@ class Dispatcher implements QueueingDispatcher
         if (! $queue instanceof Queue) {
             throw new RuntimeException('Queue resolver did not return a Queue implementation.');
         }
-        // 我们创建的DemoJob无queue方法，则不会调用
+        /*
+         * 如果定义的队列类中有queue方法，则会直接利用对应的queue进行分发。
+         * 我们创建的DemoJob无queue方法，则不会调用
+         */
         if (method_exists($command, 'queue')) {
             return $command->queue($queue, $command);
         }

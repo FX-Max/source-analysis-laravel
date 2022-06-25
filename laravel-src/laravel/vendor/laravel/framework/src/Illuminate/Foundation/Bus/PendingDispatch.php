@@ -20,7 +20,9 @@ class PendingDispatch
      * @return void
      */
     public function __construct($job)
-    {   echo '[Max] ' . 'PendingDispatch ' . '__construct' . PHP_EOL;
+    {
+        // 传入队列类实例
+        echo '[Max] ' . 'PendingDispatch ' . '__construct' . PHP_EOL;
         $this->job = $job;
     }
 
@@ -108,7 +110,9 @@ class PendingDispatch
      * @return void
      */
     public function __destruct()
-    {   echo '[Max] ' . 'PendingDispatch ' . '__destruct' . PHP_EOL;
+    {
+        echo '[Max] ' . 'PendingDispatch ' . '__destruct' . PHP_EOL;
+        // app() 形式访问，具体看服务注册
         app(Dispatcher::class)->dispatch($this->job);
     }
 }
