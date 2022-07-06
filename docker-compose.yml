@@ -9,8 +9,8 @@ services:
     volumes:
       - ./laravel-src:/var/www
     ports:
-      - "8000:8000"
-      - "9000:9000"
+      - "6008:8000"
+      - "6009:9000"
     tty: true
     depends_on:
       - redis
@@ -19,4 +19,4 @@ services:
     container_name: source-analysis-laravel-redis
     image: redis:4.0.10
     ports:
-      - 6379:6379
+      - 6079:6379
