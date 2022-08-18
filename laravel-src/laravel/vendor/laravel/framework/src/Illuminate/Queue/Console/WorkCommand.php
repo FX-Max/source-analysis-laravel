@@ -72,8 +72,10 @@ class WorkCommand extends Command
         // We'll listen to the processed and failed events so we can write information
         // to the console as jobs are processed, which will let the developer watch
         // which jobs are coming through a queue and be informed on its progress.
+        // 注册事件
         $this->listenForEvents();
 
+        // 队列链接，未传入使用queue.default
         $connection = $this->argument('connection')
                         ?: $this->laravel['config']['queue.default'];
 
@@ -97,7 +99,7 @@ class WorkCommand extends Command
     protected function runWorker($connection, $queue)
     {
         $this->worker->setCache($this->laravel['cache']->driver());
-
+        // 如果命令有 once 参数，则调用 runNextJob 方法，否则调用 daemon 方法
         return $this->worker->{$this->option('once') ? 'runNextJob' : 'daemon'}(
             $connection, $queue, $this->gatherWorkerOptions()
         );
@@ -105,6 +107,7 @@ class WorkCommand extends Command
 
     /**
      * Gather all of the queue worker options as a single object.
+     * 封装一下任务队列执行时传入的参数
      *
      * @return \Illuminate\Queue\WorkerOptions
      */
@@ -135,7 +138,7 @@ class WorkCommand extends Command
 
         $this->laravel['events']->listen(JobFailed::class, function ($event) {
             $this->writeOutput($event->job, 'failed');
-
+            // 针对failed部分，除了输出信息，还对job做存储
             $this->logFailedJob($event);
         });
     }
@@ -149,6 +152,7 @@ class WorkCommand extends Command
      */
     protected function writeOutput(Job $job, $status)
     {
+        // 根据 status 不同，输出式样不同
         switch ($status) {
             case 'starting':
                 return $this->writeStatus($job, 'Processing', 'comment');
@@ -185,6 +189,7 @@ class WorkCommand extends Command
      */
     protected function logFailedJob(JobFailed $event)
     {
+        // 存储执行失败的job
         $this->laravel['queue.failer']->log(
             $event->connectionName, $event->job->getQueue(),
             $event->job->getRawBody(), $event->exception

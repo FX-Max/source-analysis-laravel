@@ -81,10 +81,11 @@ abstract class Job
      */
     public function fire()
     {
+        // 从 payload 中得到 类，方法，和数据，执行
         $payload = $this->payload();
-
+        var_dump($payload);
         [$class, $method] = JobName::parse($payload['job']);
-
+        var_dump($class);var_dump($method);var_dump($payload['data']);
         ($this->instance = $this->resolve($class))->{$method}($this, $payload['data']);
     }
 

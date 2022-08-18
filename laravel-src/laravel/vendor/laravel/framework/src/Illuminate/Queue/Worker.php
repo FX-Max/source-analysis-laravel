@@ -225,6 +225,7 @@ class Worker
      */
     public function runNextJob($connectionName, $queue, WorkerOptions $options)
     {
+        // 获取下一个 job
         $job = $this->getNextJob(
             $this->manager->connection($connectionName), $queue
         );
@@ -232,6 +233,7 @@ class Worker
         // If we're able to pull a job off of the stack, we will process it and then return
         // from this method. If there is no job on the queue, we will "sleep" the worker
         // for the specified number of seconds, then keep processing jobs after sleep.
+        // 如果 job 存在,则执行这个 job，否则 sleep 一段时间，等下一次捞取
         if ($job) {
             return $this->runJob($job, $connectionName, $options);
         }
@@ -248,7 +250,9 @@ class Worker
      */
     protected function getNextJob($connection, $queue)
     {
+        // 从队列中 pop 出一个 job
         try {
+            // $queue 可以传入多个队列名字，位于前面的优先级高
             foreach (explode(',', $queue) as $queue) {
                 if (! is_null($job = $connection->pop($queue))) {
                     return $job;
@@ -321,8 +325,9 @@ class Worker
             // First we will raise the before job event and determine if the job has already ran
             // over its maximum attempt limits, which could primarily happen when this job is
             // continually timing out and not actually throwing any exceptions from itself.
+            // 注册 job 执行前的事件
             $this->raiseBeforeJobEvent($connectionName, $job);
-
+            // job 已到达最大尝试次数
             $this->markJobAsFailedIfAlreadyExceedsMaxAttempts(
                 $connectionName, $job, (int) $options->maxTries
             );
@@ -336,6 +341,7 @@ class Worker
             // proper events will be fired to let any listeners know this job has finished.
             $job->fire();
 
+            // 注册 job 执行后的事件
             $this->raiseAfterJobEvent($connectionName, $job);
         } catch (Exception $e) {
             $this->handleJobException($connectionName, $job, $options, $e);
